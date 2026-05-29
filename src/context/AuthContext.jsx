@@ -1,85 +1,44 @@
-import {
-  createContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-import { loginUser } from "../api/auth";
+export const AuthContext = createContext();
 
-export const AuthContext =
-  createContext();
-
-export const AuthProvider = ({
-  children,
-}) => {
-  const [user, setUser] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser =
-      localStorage.getItem("user");
+    const savedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      if (savedUser && savedUser !== "undefined") {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage:", error);
+      localStorage.removeItem("user");
+      setUser(null);
     }
-
-    setLoading(false);
   }, []);
 
-  const login = async (data) => {
-    const response =
-      await loginUser(data);
+  const login = (data) => {
+    localStorage.setItem("token", data.access);
 
-    localStorage.setItem(
-      "access",
-      response.access
-    );
-
-    localStorage.setItem(
-      "refresh",
-      response.refresh
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(response.user)
-    );
-
-    setUser(response.user);
-
-    return response.user;
+    if (data.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem(
-      "access"
-    );
-
-    localStorage.removeItem(
-      "refresh"
-    );
-
-    localStorage.removeItem(
-      "user"
-    );
-
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        loading,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
+
+export const useAuth = () => useContext(AuthContext);
