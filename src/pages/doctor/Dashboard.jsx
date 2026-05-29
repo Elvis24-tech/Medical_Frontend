@@ -1,9 +1,11 @@
-export default function Dashboard(){
-    return(
-    <div>
-    <h1>
-    Doctor Dashboard
-    </h1>
-    </div>
-    )
-    }
+const Dashboard = () => {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold">
+          Doctor Dashboard
+        </h1>
+      </div>
+    );
+  };
+  
+  export default Dashboard;
