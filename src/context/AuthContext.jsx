@@ -1,30 +1,85 @@
-import { createContext, useContext, useState, useEffect } from "react";
-export const AuthContext = createContext();
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+import {
+  createContext,
+  useEffect,
+  useState,
+} from "react";
+
+import { loginUser } from "../api/auth";
+
+export const AuthContext =
+  createContext();
+
+export const AuthProvider = ({
+  children,
+}) => {
+  const [user, setUser] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const storedUser =
+      localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
+
+    setLoading(false);
   }, []);
 
-  const login = (data) => {
-    localStorage.setItem("token", data.access);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setUser(data.user);
+  const login = async (data) => {
+    const response =
+      await loginUser(data);
+
+    localStorage.setItem(
+      "access",
+      response.access
+    );
+
+    localStorage.setItem(
+      "refresh",
+      response.refresh
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.user)
+    );
+
+    setUser(response.user);
+
+    return response.user;
   };
 
   const logout = () => {
-    localStorage.clear();
+    localStorage.removeItem(
+      "access"
+    );
+
+    localStorage.removeItem(
+      "refresh"
+    );
+
+    localStorage.removeItem(
+      "user"
+    );
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        loading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
-
-export const useAuth = () => useContext(AuthContext);
+};
