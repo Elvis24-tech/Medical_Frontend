@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { getPatientAppointments } from "../../api/appointments";
-import PageHeader from "../../components/common/PageHeader";
-import Loader from "../../components/common/Loader";
-import ErrorMessage from "../../components/common/ErrorMessage";
-import AppointmentCard from "../../components/appointments/AppointmentCard";
 
 export default function MyAppointments() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -17,28 +11,23 @@ export default function MyAppointments() {
   const fetchData = async () => {
     try {
       const res = await getPatientAppointments();
-      setData(res.data || []);
+      setAppointments(res.data);
     } catch (err) {
-      setError("Failed to load appointments");
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   };
 
-  if (loading) return <Loader />;
-  if (error) return <ErrorMessage message={error} />;
-
   return (
-    <div className="p-6">
-      <PageHeader title="My Appointments" />
+    <div>
+      <h2 className="text-xl font-bold">My Appointments</h2>
 
-      {data.length === 0 ? (
-        <p>No appointments found</p>
-      ) : (
-        data.map((item) => (
-          <AppointmentCard key={item.id} appointment={item} />
-        ))
-      )}
+      {appointments.map((a) => (
+        <div key={a.id} className="border p-3 my-2">
+          <p>Doctor: {a.doctor}</p>
+          <p>Date: {a.appointment_date}</p>
+          <p>Status: {a.status}</p>
+        </div>
+      ))}
     </div>
   );
 }
