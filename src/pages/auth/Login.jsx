@@ -13,6 +13,9 @@ const Login = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,20 +23,39 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    login({
-      name: "John Doe",
-      email: formData.email,
-      role: "admin",
-    });
+    try {
+      const res = await login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    navigate("/admin/dashboard");
+      const user = res.user;
+      localStorage.setItem("user", JSON.stringify(user));
+      if (user.role === "patient") {
+        navigate("/patient/dashboard");
+      } else if (user.role === "doctor") {
+        navigate("/doctor/dashboard");
+      } else if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/unauthorized");
+      }
+
+    } catch (err) {
+      console.log(err);
+      setError("Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div>
+    <div className="max-w-md mx-auto mt-10">
       <h2 className="text-3xl font-bold mb-6 text-center">
         Hospital Login
       </h2>
@@ -43,7 +65,6 @@ const Login = () => {
           label="Email"
           name="email"
           type="email"
-          placeholder="Enter email"
           value={formData.email}
           onChange={handleChange}
         />
@@ -52,13 +73,16 @@ const Login = () => {
           label="Password"
           name="password"
           type="password"
-          placeholder="Enter password"
           value={formData.password}
           onChange={handleChange}
         />
 
-        <Button type="submit" className="w-full">
-          Login
+        {error && (
+          <p className="text-red-500 text-sm text-center">{error}</p>
+        )}
+
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </Button>
       </form>
     </div>

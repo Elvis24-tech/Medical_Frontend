@@ -1,44 +1,22 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useState } from "react";
+import { loginUser } from "../api/auth";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+  const login = async (email, password) => {
+    const res = await loginUser({ email, password });
 
-    try {
-      if (savedUser && savedUser !== "undefined") {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch (error) {
-      console.error("Failed to parse user from localStorage:", error);
-      localStorage.removeItem("user");
-      setUser(null);
-    }
-  }, []);
-
-  const login = (data) => {
-    localStorage.setItem("token", data.access);
-
-    if (data.user) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
+    setUser(res.data.user);
+    localStorage.setItem("access", res.data.access);
+    localStorage.setItem("refresh", res.data.refresh);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login }}>
       {children}
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(AuthContext);
