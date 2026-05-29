@@ -1,0 +1,11 @@
+const MyAppointments = () => {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold">
+          My Appointments
+        </h1>
+      </div>
+    );
+  };
+  
+  export default MyAppointments;
