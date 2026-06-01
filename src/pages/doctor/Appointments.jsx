@@ -18,7 +18,6 @@ const Appointments = () => {
     try {
       const res = await getAppointments();
 
-      // ✅ FIX: normalize response
       const list =
         res?.results ||
         res?.data ||
@@ -39,15 +38,13 @@ const Appointments = () => {
       if (action === "cancel") await cancelAppointment(id);
       if (action === "complete") await completeAppointment(id);
 
-      fetchData();
+      await fetchData();
     } catch (err) {
       console.error("Action failed:", err);
     }
   };
 
-  const safeAppointments = Array.isArray(appointments)
-    ? appointments
-    : [];
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
 
   if (loading) return <p className="p-4">Loading...</p>;
 
@@ -62,39 +59,73 @@ const Appointments = () => {
       ) : (
         safeAppointments.map((a) => (
           <div key={a.id} className="border p-3 my-2 rounded bg-white">
+            
             <p>
               <b>Patient:</b> {a.patient_name || a.patient || "Unknown"}
             </p>
 
             <p>
-              <b>Date:</b> {a.appointment_date}
+              <b>Date:</b> {a.appointment_date} {a.appointment_time}
             </p>
 
             <p>
-              <b>Status:</b> {a.status}
+              <b>Status:</b>{" "}
+              <span className="font-semibold">
+                {a.status}
+              </span>
             </p>
 
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => handleAction(a.id, "approve")}
-                className="px-3 py-1 bg-blue-600 text-white rounded"
-              >
-                Approve
-              </button>
+            {/* ✅ ACTIONS BASED ON STATUS */}
+            <div className="flex gap-2 mt-3 flex-wrap">
 
-              <button
-                onClick={() => handleAction(a.id, "complete")}
-                className="px-3 py-1 bg-green-600 text-white rounded"
-              >
-                Complete
-              </button>
+              {a.status === "pending" && (
+                <>
+                  <button
+                    onClick={() => handleAction(a.id, "approve")}
+                    className="px-3 py-1 bg-blue-600 text-white rounded"
+                  >
+                    Approve
+                  </button>
 
-              <button
-                onClick={() => handleAction(a.id, "cancel")}
-                className="px-3 py-1 bg-red-600 text-white rounded"
-              >
-                Cancel
-              </button>
+                  <button
+                    onClick={() => handleAction(a.id, "cancel")}
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+
+              {a.status === "approved" && (
+                <>
+                  <button
+                    onClick={() => handleAction(a.id, "complete")}
+                    className="px-3 py-1 bg-green-600 text-white rounded"
+                  >
+                    Mark Complete
+                  </button>
+
+                  <button
+                    onClick={() => handleAction(a.id, "cancel")}
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+
+              {a.status === "completed" && (
+                <span className="text-green-600 font-medium">
+                  Completed
+                </span>
+              )}
+
+              {a.status === "cancelled" && (
+                <span className="text-red-600 font-medium">
+                  Cancelled
+                </span>
+              )}
+
             </div>
           </div>
         ))
