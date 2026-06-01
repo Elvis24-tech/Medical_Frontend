@@ -1,18 +1,25 @@
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import DoctorCard from "../../components/doctors/DoctorCard";
 
 const Doctors = () => {
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. Smith",
-      specialization: "Cardiologist",
-    },
-    {
-      id: 2,
-      name: "Dr. Jane",
-      specialization: "Dentist",
-    },
-  ];
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await api.get("doctors/");
+        const data = res.data;
+
+        setDoctors(data.results || data || []);
+      } catch (err) {
+        console.error(err);
+        setDoctors([]);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   return (
     <div>
