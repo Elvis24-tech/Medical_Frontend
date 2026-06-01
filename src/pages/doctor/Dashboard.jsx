@@ -13,19 +13,31 @@ const Dashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const data = await getAppointments();
-      setAppointments(data);
+      const res = await getAppointments();
+
+      // ✅ FIX: normalize API response into array
+      const list =
+        res?.results ||
+        res?.data ||
+        (Array.isArray(res) ? res : []);
+
+      setAppointments(list);
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const total = appointments.length;
-  const pending = appointments.filter(a => a.status === "pending").length;
-  const approved = appointments.filter(a => a.status === "approved").length;
-  const completed = appointments.filter(a => a.status === "completed").length;
+  const safeAppointments = Array.isArray(appointments)
+    ? appointments
+    : [];
+
+  const total = safeAppointments.length;
+  const pending = safeAppointments.filter(a => a.status === "pending").length;
+  const approved = safeAppointments.filter(a => a.status === "approved").length;
+  const completed = safeAppointments.filter(a => a.status === "completed").length;
 
   if (loading) return <p className="p-6">Loading dashboard...</p>;
 
@@ -58,20 +70,24 @@ const Dashboard = () => {
       <div className="bg-white p-4 shadow rounded">
         <h2 className="font-bold mb-3">Recent Appointments</h2>
 
-        {appointments.slice(0, 5).map(a => (
-          <div key={a.id} className="border-b py-2 flex justify-between">
-            <div>
-              <p className="font-medium">
-                {a.patient_name || "Patient"}
-              </p>
-              <p className="text-sm text-gray-500">
-                {a.appointment_date} • {a.appointment_time}
-              </p>
-            </div>
+        {safeAppointments.length === 0 ? (
+          <p className="text-gray-500">No appointments yet</p>
+        ) : (
+          safeAppointments.slice(0, 5).map(a => (
+            <div key={a.id} className="border-b py-2 flex justify-between">
+              <div>
+                <p className="font-medium">
+                  {a.patient_name || "Patient"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {a.appointment_date} • {a.appointment_time}
+                </p>
+              </div>
 
-            <span className="text-sm capitalize">{a.status}</span>
-          </div>
-        ))}
+              <span className="text-sm capitalize">{a.status}</span>
+            </div>
+          ))
+        )}
       </div>
 
     </div>

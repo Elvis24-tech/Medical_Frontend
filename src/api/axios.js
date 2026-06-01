@@ -8,13 +8,12 @@ const api = axios.create({
   },
 });
 
-// ✅ Attach token ONLY for protected routes
 api.interceptors.request.use((config) => {
   const token = getToken();
 
   const isAuthRoute =
-    config.url?.includes("auth/login") ||
-    config.url?.includes("auth/register");
+    config.url?.startsWith("auth/login") ||
+    config.url?.startsWith("auth/register");
 
   if (token && !isAuthRoute) {
     config.headers.Authorization = `Bearer ${token}`;

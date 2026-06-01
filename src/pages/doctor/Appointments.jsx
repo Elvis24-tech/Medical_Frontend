@@ -16,8 +16,18 @@ const Appointments = () => {
 
   const fetchData = async () => {
     try {
-      const data = await getAppointments();
-      setAppointments(data);
+      const res = await getAppointments();
+
+      // ✅ FIX: normalize response
+      const list =
+        res?.results ||
+        res?.data ||
+        (Array.isArray(res) ? res : []);
+
+      setAppointments(list);
+    } catch (err) {
+      console.error("Failed to load appointments:", err);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -31,46 +41,64 @@ const Appointments = () => {
 
       fetchData();
     } catch (err) {
-      console.error(err);
+      console.error("Action failed:", err);
     }
   };
+
+  const safeAppointments = Array.isArray(appointments)
+    ? appointments
+    : [];
 
   if (loading) return <p className="p-4">Loading...</p>;
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Doctor Appointments</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        Doctor Appointments
+      </h1>
 
-      {appointments.map((a) => (
-        <div key={a.id} className="border p-3 my-2 rounded bg-white">
-          <p><b>Patient:</b> {a.patient_name || a.patient}</p>
-          <p><b>Date:</b> {a.appointment_date}</p>
-          <p><b>Status:</b> {a.status}</p>
+      {safeAppointments.length === 0 ? (
+        <p className="text-gray-500">No appointments found</p>
+      ) : (
+        safeAppointments.map((a) => (
+          <div key={a.id} className="border p-3 my-2 rounded bg-white">
+            <p>
+              <b>Patient:</b> {a.patient_name || a.patient || "Unknown"}
+            </p>
 
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={() => handleAction(a.id, "approve")}
-              className="px-3 py-1 bg-blue-600 text-white rounded"
-            >
-              Approve
-            </button>
+            <p>
+              <b>Date:</b> {a.appointment_date}
+            </p>
 
-            <button
-              onClick={() => handleAction(a.id, "complete")}
-              className="px-3 py-1 bg-green-600 text-white rounded"
-            >
-              Complete
-            </button>
+            <p>
+              <b>Status:</b> {a.status}
+            </p>
 
-            <button
-              onClick={() => handleAction(a.id, "cancel")}
-              className="px-3 py-1 bg-red-600 text-white rounded"
-            >
-              Cancel
-            </button>
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => handleAction(a.id, "approve")}
+                className="px-3 py-1 bg-blue-600 text-white rounded"
+              >
+                Approve
+              </button>
+
+              <button
+                onClick={() => handleAction(a.id, "complete")}
+                className="px-3 py-1 bg-green-600 text-white rounded"
+              >
+                Complete
+              </button>
+
+              <button
+                onClick={() => handleAction(a.id, "cancel")}
+                className="px-3 py-1 bg-red-600 text-white rounded"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 };
