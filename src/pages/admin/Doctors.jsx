@@ -4,6 +4,7 @@ import DoctorCard from "../../components/doctors/DoctorCard";
 
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -13,23 +14,33 @@ const Doctors = () => {
 
         setDoctors(data.results || data || []);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to load doctors:", err);
         setDoctors([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDoctors();
   }, []);
 
+  if (loading) {
+    return <p className="p-6 text-gray-500">Loading doctors...</p>;
+  }
+
   return (
-    <div>
+    <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Doctors</h1>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {doctors.map((doctor) => (
-          <DoctorCard key={doctor.id} doctor={doctor} />
-        ))}
-      </div>
+      {doctors.length === 0 ? (
+        <p className="text-gray-500">No doctors found</p>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {doctors.map((doctor) => (
+            <DoctorCard key={doctor.id} doctor={doctor} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

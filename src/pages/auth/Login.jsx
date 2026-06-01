@@ -47,11 +47,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 via-white to-blue-50 px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-sm sm:max-w-md">
-        <div className="bg-white/90 backdrop-blur border border-gray-200 shadow-xl rounded-2xl px-5 sm:px-8 py-8 sm:py-10">
-          <div className="mb-6 sm:mb-8 text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+        <div className="bg-white border border-gray-200 shadow-xl rounded-2xl px-6 sm:px-8 py-8 sm:py-10">
+          <div className="mb-6 text-center">
+            <h1 className="text-3xl font-bold text-gray-900">
               Hospital Management System
             </h1>
             <p className="text-sm text-gray-500 mt-2">
@@ -59,11 +59,11 @@ const Login = () => {
             </p>
           </div>
           {error && (
-            <div className="mb-5 text-sm text-red-700 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
+            <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Email
@@ -74,9 +74,10 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
-                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition text-sm sm:text-base"
+                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
+
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Password
@@ -87,19 +88,35 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
-                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition text-sm sm:text-base"
+                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
+
             <Button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
             >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
+
           </form>
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don’t have an account?
+            </p>
+
+            <button
+              onClick={() => navigate("/register")}
+              className="mt-2 text-blue-600 hover:text-blue-800 font-semibold"
+            >
+              Create Account
+            </button>
+          </div>
+
         </div>
-        <p className="text-center text-xs text-gray-400 mt-5 sm:mt-6 px-4">
+
+        <p className="text-center text-xs text-gray-400 mt-5">
           Secure access for authorized hospital staff only
         </p>
 
