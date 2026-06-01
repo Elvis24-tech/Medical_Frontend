@@ -1,38 +1,31 @@
 import { useEffect, useState } from "react";
+import api from "../../api/axios";
 
 const MedicalHistory = () => {
   const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data (later you will replace with API call)
-    const data = [
-      {
-        id: 1,
-        title: "General Checkup",
-        doctor: "Dr. Smith",
-        date: "2026-05-10",
-        status: "Completed",
-        notes: "Patient is in good health. Blood pressure normal.",
-      },
-      {
-        id: 2,
-        title: "Malaria Treatment",
-        doctor: "Dr. James",
-        date: "2026-04-22",
-        status: "Completed",
-        notes: "Prescribed Artemether-Lumefantrine for 3 days.",
-      },
-      {
-        id: 3,
-        title: "Dental Review",
-        doctor: "Dr. Kevin",
-        date: "2026-03-15",
-        status: "Follow-up",
-        notes: "Minor cavity detected, follow-up in 2 weeks.",
-      },
-    ];
+    const fetchRecords = async () => {
+      try {
+        const res = await api.get("medical/records/");
 
-    setRecords(data);
+        const data =
+          res.data?.results ||
+          res.data?.data ||
+          res.data ||
+          [];
+
+        setRecords(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load medical records:", err);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
   }, []);
 
   return (
@@ -48,43 +41,56 @@ const MedicalHistory = () => {
         </p>
       </div>
 
-      {/* TIMELINE / RECORDS */}
-      <div className="space-y-4">
-        {records.map((record) => (
-          <div
-            key={record.id}
-            className="bg-white p-5 rounded-xl shadow hover:shadow-md transition"
-          >
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                {record.title}
-              </h2>
+      {/* CONTENT */}
+      {loading ? (
+        <p className="text-gray-500">Loading records...</p>
+      ) : records.length === 0 ? (
+        <p className="text-gray-500">No medical history found</p>
+      ) : (
+        <div className="space-y-4">
 
-              <span
-                className={`text-sm px-3 py-1 rounded-full ${
-                  record.status === "Completed"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-yellow-100 text-yellow-600"
-                }`}
-              >
-                {record.status}
-              </span>
+          {records.map((record) => (
+            <div
+              key={record.id}
+              className="bg-white p-5 rounded-xl shadow hover:shadow-md transition"
+            >
+
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {record.title || "Medical Record"}
+                </h2>
+
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ${
+                    record.status === "Completed"
+                      ? "bg-green-100 text-green-600"
+                      : record.status === "Pending"
+                      ? "bg-yellow-100 text-yellow-600"
+                      : "bg-blue-100 text-blue-600"
+                  }`}
+                >
+                  {record.status}
+                </span>
+              </div>
+
+              <p className="text-gray-500 mt-1">
+                Doctor: {record.doctor?.user?.username || "N/A"}
+              </p>
+
+              <p className="text-gray-500 text-sm">
+                Date: {record.date || record.created_at}
+              </p>
+
+              <p className="mt-3 text-gray-700">
+                {record.notes || "No notes available"}
+              </p>
+
             </div>
+          ))}
 
-            <p className="text-gray-500 mt-1">
-              Doctor: {record.doctor}
-            </p>
+        </div>
+      )}
 
-            <p className="text-gray-500 text-sm">
-              Date: {record.date}
-            </p>
-
-            <p className="mt-3 text-gray-700">
-              {record.notes}
-            </p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

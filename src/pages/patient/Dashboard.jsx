@@ -1,13 +1,53 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../api/axios";
+import { getAppointments } from "../../api/appointments";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [bills, setBills] = useState([]);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setUser(storedUser);
+
+    const fetchData = async () => {
+      try {
+        // APPOINTMENTS
+        const appts = await getAppointments();
+        setAppointments(appts);
+
+        // BILLS
+        const billsRes = await api.get("billing/");
+        const billsData =
+          billsRes.data?.results ||
+          billsRes.data?.data ||
+          billsRes.data ||
+          [];
+        setBills(Array.isArray(billsData) ? billsData : []);
+
+        // MEDICAL RECORDS
+        const recordsRes = await api.get("medical/records/");
+        const recordsData =
+          recordsRes.data?.results ||
+          recordsRes.data?.data ||
+          recordsRes.data ||
+          [];
+        setRecords(Array.isArray(recordsData) ? recordsData : []);
+
+      } catch (err) {
+        console.error("Dashboard load failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -28,19 +68,31 @@ const Dashboard = () => {
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
+        {/* APPOINTMENTS */}
         <div className="bg-white p-5 rounded-xl shadow">
           <h2 className="text-gray-500">Upcoming Appointments</h2>
-          <p className="text-2xl font-bold text-blue-600">2</p>
+          <p className="text-2xl font-bold text-blue-600">
+            {loading ? "..." : appointments.length}
+          </p>
         </div>
 
+        {/* BILLS */}
         <div className="bg-white p-5 rounded-xl shadow">
           <h2 className="text-gray-500">Pending Bills</h2>
-          <p className="text-2xl font-bold text-red-500">KSh 1,200</p>
+          <p className="text-2xl font-bold text-red-500">
+            KSh{" "}
+            {bills
+              .filter((b) => b.status === "Pending")
+              .reduce((sum, b) => sum + Number(b.amount || 0), 0)}
+          </p>
         </div>
 
+        {/* MEDICAL RECORDS */}
         <div className="bg-white p-5 rounded-xl shadow">
           <h2 className="text-gray-500">Medical Records</h2>
-          <p className="text-2xl font-bold text-green-600">5</p>
+          <p className="text-2xl font-bold text-green-600">
+            {records.length}
+          </p>
         </div>
 
       </div>
@@ -91,10 +143,20 @@ const Dashboard = () => {
         </h2>
 
         <ul className="space-y-3 text-gray-600">
-          <li>✔ Appointment booked with Dr. Smith</li>
-          <li>✔ Lab results uploaded</li>
-          <li>✔ Payment of KSh 1,200 completed</li>
+          {appointments.slice(0, 3).map((appt) => (
+            <li key={appt.id}>
+              ✔ Appointment with Dr.{" "}
+              {appt.doctor?.user?.username || "Doctor"} on{" "}
+              {appt.appointment_date}
+            </li>
+          ))}
         </ul>
+
+        {appointments.length === 0 && (
+          <p className="text-gray-500">
+            No recent activity
+          </p>
+        )}
       </div>
 
     </div>
