@@ -3,37 +3,29 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { useAuth } from "../../hooks/useAuth";
-
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const res = await login({
         email: formData.email,
         password: formData.password,
       });
-
       const user = res.user;
-      localStorage.setItem("user", JSON.stringify(user));
-
+      localStorage.setItem("user", JSON.stringify(user))
       if (user.role === "patient") navigate("/patient/dashboard");
       else if (user.role === "doctor") navigate("/doctor/dashboard");
       else if (user.role === "admin") navigate("/admin/dashboard");
@@ -47,12 +39,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="w-full max-w-sm sm:max-w-md">
-        <div className="bg-white border border-gray-200 shadow-xl rounded-2xl px-6 sm:px-8 py-8 sm:py-10">
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Hospital Management System
+    <div className="min-h-screen bg-linear-to-br from-teal-50 via-blue-50 to-green-50 flex items-center justify-center px-4 overflow-hidden">
+      <div className="absolute w-96 h-96 bg-teal-300/30 blur-3xl rounded-full"></div>
+      <div className="absolute w-80 h-80 bg-blue-300/30 blur-3xl rounded-full translate-x-10"></div>
+      <div className="relative w-full max-w-md">
+        <div className="bg-white rounded-3xl p-8 shadow-2xl border border-teal-100">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-black text-teal-700">
+              MediCare Login
             </h1>
             <p className="text-sm text-gray-500 mt-2">
               Sign in to continue securely
@@ -74,7 +68,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
-                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="mt-1 w-full rounded-xl border-gray-200 focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
 
@@ -88,36 +82,33 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
-                className="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="mt-1 w-full rounded-xl border-gray-200 focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-2xl shadow-lg transition"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Signing in..." : "Get Started"}
             </Button>
-
           </form>
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               Don’t have an account?
             </p>
 
             <button
               onClick={() => navigate("/register")}
-              className="mt-2 text-blue-600 hover:text-blue-800 font-semibold"
+              className="mt-2 text-teal-600 hover:text-teal-700 font-semibold"
             >
               Create Account
             </button>
           </div>
-
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-5">
-          Secure access for authorized hospital staff only
+        <p className="text-center text-xs text-gray-500 mt-5">
+          Trusted for safe patient care and modern hospital workflows
         </p>
 
       </div>
